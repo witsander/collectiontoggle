@@ -1,0 +1,15 @@
+schema_version = "1.0.0"
+id = "collection_toggle"
+version = "1.0.2"
+name = "Collection Toggle"
+tagline = "Show/hide collections with 1-0 on the keyboard, just like in Blender 4"
+maintainer = "Sander Wit"
+type = "add-on"
+website = "https://superhivemarket.com/creators/sanderwit"
+tags = ["Collections", "Keymap", "3D View", "Workflow"]
+blender_version_min = "4.5.0"
+license = [ "SPDX:GPL-3.0-or-later" ]
+copyright = [ "2025 Sander Wit" ]
+platforms = [ "windows-x64", "macos-x64", "macos-arm64", "linux-x64" ]
+[permissions]
+files = "read-write"
