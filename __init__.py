@@ -5,20 +5,35 @@ def get_collections():
     """Return all top-level collections of the active scene."""
     return list(bpy.context.scene.collection.children)
 
+def get_layer_collections(context):
+    """Return all top-level Layer Collections of the active view layer."""
+    # We must use context.view_layer if available for proper context
+    return list(context.view_layer.layer_collection.children)
+
 def toggle_viewport_all():
     """Toggles viewport visibility for all top-level collections (Hide All or Show All)."""
-    cols = get_collections()
-    any_hidden = any(col.hide_viewport for col in cols)
-    for col in cols:
-        col.hide_viewport = not any_hidden
+    context = bpy.context
+    layer_cols = get_layer_collections(context)
+    
+    # Check current state based on Layer Collections
+    any_hidden = any(lc.hide_viewport for lc in layer_cols)
+    new_state = not any_hidden
+    
+    # Iterate and synchronize both Layer Collection (lc) and Data Block Collection (col)
+    for lc in layer_cols:
+        lc.hide_viewport = new_state
+        # Also set the Data Block Collection property for full synchronization
+        if lc.collection:
+            lc.collection.hide_viewport = new_state
         
 def toggle_render_all():
     """Toggles render visibility for all top-level collections (Hide All or Show All)."""
+    # Render visibility is already on the Data Block, so no change needed here.
     cols = get_collections()
     any_hidden = any(col.hide_render for col in cols)
     for col in cols:
         col.hide_render = not any_hidden
-
+        
 class COLLECTION_SET_ACTIVE_OT_set(bpy.types.Operator):
     """Sets the indexed collection as the active collection."""
     bl_idname = "view3d.collection_set_active"
@@ -74,6 +89,11 @@ class COLLECTION_TOGGLE_OT_toggle(bpy.types.Operator):
             
             if 1 <= index <= len(cols):
                 col = cols[index - 1]
+                
+                # Get the corresponding Layer Collection for viewport actions
+                lc = context.view_layer.layer_collection.children.get(col.name)
+                if not lc:
+                    return {'CANCELLED'}
 
                 # --- ALT PRESSED: Render Toggle/Isolate (Primary Action) ---
                 if self.alt_pressed:
@@ -85,6 +105,7 @@ class COLLECTION_TOGGLE_OT_toggle(bpy.types.Operator):
                             # ALT + 1-0: ISOLATE RENDER
                             for c in cols:
                                 c.hide_render = (c != col)
+                        
                         alt_action_taken = True
                         action_performed = True
                     else:
@@ -93,9 +114,11 @@ class COLLECTION_TOGGLE_OT_toggle(bpy.types.Operator):
                 # --- NO ALT PRESSED: Viewport Toggle/Isolate ---
                 else:
                     if self.shift_pressed:
-                        # SHIFT + 1-0: TOGGLE VIEWPORT
+                        # SHIFT + 1-0: TOGGLE VIEWPORT (Forced synchronization)
                         if prefs.enable_view:
-                            col.hide_viewport = not col.hide_viewport
+                            new_state = not lc.hide_viewport
+                            lc.hide_viewport = new_state
+                            col.hide_viewport = new_state
                             action_performed = True
                         else:
                             return {'CANCELLED'}
@@ -103,28 +126,40 @@ class COLLECTION_TOGGLE_OT_toggle(bpy.types.Operator):
                     else:
                         # Set Active Collection
                         if prefs.enable_active:
-                            context.view_layer.active_layer_collection = context.view_layer.layer_collection.children[col.name]
+                            # Set the current scene's active layer (collection)
+                            context.view_layer.active_layer_collection = lc
                             action_performed = True
                         
-                        # 1-0 KEYPRESS: ISOLATE VIEWPORT
+                        # 1-0 KEYPRESS: ISOLATE VIEWPORT (Forced synchronization)
                         if prefs.enable_view:
-                            for c in cols:
-                                c.hide_viewport = (c != col)
+                            isolate_lc = lc
+                            all_layer_cols = context.view_layer.layer_collection.children
+                            
+                            for child_lc in all_layer_cols:
+                                is_target = (child_lc == isolate_lc)
+                                
+                                # Set Layer Collection visibility
+                                child_lc.hide_viewport = not is_target
+                                
+                                # Set Data Block Collection visibility for synchronization
+                                if child_lc.collection:
+                                    child_lc.collection.hide_viewport = not is_target
+
                             action_performed = True
                         else:
                             # If no action is taken, we must cancel. The set_active operator handles the other case.
-                            return {'CANCELLED'} 
+                            return {'CANCELLED'}
                         
 
         elif k == 'ACCENT_GRAVE':
             if self.alt_pressed:
                 if prefs.enable_render:
-                    toggle_render_all()
+                    toggle_render_all() 
                     alt_action_taken = True
                     action_performed = True
             else:
                 if prefs.enable_view:
-                    toggle_viewport_all()
+                    toggle_viewport_all() # Uses the updated sync function
                     action_performed = True
 
         if alt_action_taken:

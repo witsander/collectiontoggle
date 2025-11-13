@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "collection_toggle"
-version = "1.0.2"
+version = "1.0.3"
 name = "Collection Toggle"
 tagline = "Show/hide collections with 1-0 on the keyboard, just like in Blender 4"
 maintainer = "Sander Wit"
