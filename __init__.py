@@ -267,7 +267,7 @@ class COLLECTION_TOGGLE_Preferences(AddonPreferences):
         
     enable_view: bpy.props.BoolProperty(
         name="Toggle view",
-        description="Show/hide collections with keyboard",
+        description="Show/hide collections with keyboard 1-0",
         default=True,
         update=lambda self, context: self.update_keymaps(context)
     )
@@ -278,8 +278,8 @@ class COLLECTION_TOGGLE_Preferences(AddonPreferences):
         update=lambda self, context: self.update_keymaps(context)
     )
     enable_active: bpy.props.BoolProperty(
-        name="Activate collection",
-        description="Also select collection with keyboard",
+        name="Select collection",
+        description="Select collection with keyboard 1-0",
         default=True
     )
     show_info: bpy.props.BoolProperty(
@@ -304,7 +304,7 @@ class COLLECTION_TOGGLE_Preferences(AddonPreferences):
         row.alignment = 'LEFT'
         row.prop(self, "enable_render", text=txt2, icon=icon2)
                 
-        layout.label(text="Activate collection with keyboard 1-0")
+        layout.label(text="Select collection with keyboard 1-0")
         icon3 = "RESTRICT_SELECT_OFF" if self.enable_active else "RESTRICT_SELECT_ON"
         txt3 = "Enabled" if self.enable_active else "Disabled"
         row = layout.row()
@@ -360,7 +360,7 @@ class COLLECTION_TOGGLE_PT_ui(Panel):
         layout.separator()
         
         # Active
-        layout.label(text="Activate collection with keyboard 1-0")
+        layout.label(text="Select collection with keyboard 1-0")
         icon3 = "RESTRICT_SELECT_OFF" if prefs.enable_active else "RESTRICT_SELECT_ON"
         layout.prop(prefs, "enable_active", text="Toggle select", icon=icon3)
         
