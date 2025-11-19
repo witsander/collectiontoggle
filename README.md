@@ -18,3 +18,11 @@ Select collections
 - press 1, 2, 3.. to select that collection
 
 You can enable/disable these three options in the sidebar of your 3D viewport.
+
+## Install
+To install this addon, press the green 'Code' button and choose 'Download ZIP'. Than just drag that ZIP file to your 3D viewport.
+
+## Support
+To support me, you can [buy the addon on Gumroad](https://sanderwit.gumroad.com/l/collectiontoggle) for €1 or [buy the Easy Camera Tracker](https://superhivemarket.com/products/easy-camera-tracker/) addon of Blender on the SuperhiveMarket.
+
+Have a nice day!
